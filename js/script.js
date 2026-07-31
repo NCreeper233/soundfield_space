@@ -148,4 +148,21 @@
      CSS 动画 translateX(-50%) 循环，半份内容恰好被另一半无缝接上 */
   var marquee = document.getElementById('watermark-scroll')
   marquee.innerHTML += marquee.innerHTML
+
+  /* ---------- 禁止复制：拦截复制 / 剪切 / 拖拽 ----------
+     全站禁止复制内容（配合 CSS 的 user-select: none）；
+     例外：输入框（如搜索框）内允许正常选择与粘贴 */
+  function isEditable (el) {
+    return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)
+  }
+  document.addEventListener('copy', function (e) {
+    if (!isEditable(e.target)) e.preventDefault()
+  })
+  document.addEventListener('cut', function (e) {
+    if (!isEditable(e.target)) e.preventDefault()
+  })
+  /* 禁止拖拽选中内容 / 拖走图片 */
+  document.addEventListener('dragstart', function (e) {
+    e.preventDefault()
+  })
 })()

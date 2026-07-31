@@ -62,6 +62,12 @@ a, button, [role="button"] {
 a { text-decoration: none; color: inherit; }
 button { font-family: inherit; background: none; border: none; }
 
+/* ============================================================
+   禁止复制：全站禁用文本选中与拖拽（保留输入框内的选择/粘贴）
+   ============================================================ */
+* { -webkit-user-select: none; user-select: none; }
+input, textarea { -webkit-user-select: text; user-select: text; }
+
 /* ----- 技术网格背景：fixed 铺满全屏的 40px 网格（body 伪元素） ----- */
 body::before {
   content: '';
