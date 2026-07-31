@@ -8,7 +8,7 @@
     "commands": [
       { "cmd": "git add .", "desc": "暂存所有文件" },
       { "cmd": "git commit -m \"commit\"", "desc": "提交更改" },
-      { "cmd": "git push -u origin main", "desc": "推送到远程" }
+      { "cmd": "git push -u origin main --force", "desc": "推送到远程" }
     ]
   }
 }
