@@ -149,6 +149,30 @@
   var marquee = document.getElementById('watermark-scroll')
   marquee.innerHTML += marquee.innerHTML
 
+  /* ---------- 主题切换（浅色/深色） ----------
+     初始值：localStorage 记忆 > 系统 prefers-color-scheme；
+     点击右下角按钮切换并持久化；同步更新 theme-color（移动端浏览器外壳色） */
+  var themeBtn = document.getElementById('btn-theme')
+  var metaThemeColor = document.getElementById('meta-theme-color')
+  var savedTheme = null
+  try { savedTheme = localStorage.getItem('sf-theme') } catch (e) {}
+  var preferDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  var currentTheme = savedTheme === 'light' || savedTheme === 'dark'
+    ? savedTheme
+    : (preferDark ? 'dark' : 'light')
+
+  function applyTheme (theme) {
+    document.documentElement.setAttribute('data-theme', theme)
+    try { localStorage.setItem('sf-theme', theme) } catch (e) {}
+    if (metaThemeColor) metaThemeColor.setAttribute('content', theme === 'dark' ? '#0f1419' : '#fafafa')
+  }
+  applyTheme(currentTheme)
+  if (themeBtn) {
+    themeBtn.addEventListener('click', function () {
+      applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')
+    })
+  }
+
   /* ---------- 禁止复制：拦截复制 / 剪切 / 拖拽 ----------
      全站禁止复制内容（配合 CSS 的 user-select: none）；
      例外：输入框（如搜索框）内允许正常选择与粘贴 */

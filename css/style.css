@@ -31,6 +31,42 @@
     0 8px 16px rgba(0, 0, 0, 0.06),
     0 16px 32px rgba(0, 0, 0, 0.04),
     0 0 0 1px var(--endspace-accent-yellow);
+  --endspace-text-strong: #000000;      /* 高对比标题文字（黄底悬停时转黑） */
+  --endspace-heading-text: #E8E8EA;     /* 区段大标题（蚀刻感近白字） */
+  --endspace-ctrl-bg: #ffffff;          /* 悬浮按钮底色 */
+  --endspace-ctrl-icon: #afb4bd;        /* 悬浮按钮图标默认描边 */
+  --endspace-ctrl-percent: #4b5563;     /* 回顶按钮百分比文字 */
+  --endspace-scrollbar-thumb: #d4d4d8;  /* 滚动条滑块 */
+  color-scheme: light;
+}
+
+/* ----- 深色模式变量：html 挂 data-theme="dark" 时整体换肤（script.js 切换）
+   色系围绕 #0f1419 的中性炭灰色，避免偏蓝 ----- */
+:root[data-theme="dark"] {
+  --endspace-bg-base: #0f1419;          /* 页面底色（锚点色，与加载遮罩同底） */
+  --endspace-bg-primary: #16191d;       /* 卡片底色 */
+  --endspace-bg-secondary: #1d2125;     /* 输入框等次级底色 */
+  --endspace-bg-tertiary: #272b2f;      /* 按钮等三级底色 */
+  --endspace-text-primary: #e8eaeb;     /* 主文字 */
+  --endspace-text-secondary: #99a1a7;   /* 次级文字 */
+  --endspace-text-muted: #6a7177;       /* 弱化文字（水印/提示） */
+  --endspace-text-strong: #f2f4f5;      /* 高对比标题文字 */
+  --endspace-border-base: #24282c;      /* 常规边框 */
+  --endspace-grid-color: rgba(255, 255, 255, 0.04); /* 页面网格线 */
+  --endspace-ctrl-bg: #1d2125;          /* 悬浮按钮底色 */
+  --endspace-ctrl-icon: #848c93;        /* 悬浮按钮图标默认描边 */
+  --endspace-ctrl-percent: #a9b0b6;     /* 回顶按钮百分比文字 */
+  --endspace-scrollbar-thumb: #2f3438;  /* 滚动条滑块 */
+  --endspace-shadow-base:
+    0 1px 2px rgba(0, 0, 0, 0.35),
+    0 2px 4px rgba(0, 0, 0, 0.35),
+    0 4px 8px rgba(0, 0, 0, 0.3);
+  --endspace-shadow-hover:
+    0 4px 8px rgba(0, 0, 0, 0.5),
+    0 8px 16px rgba(0, 0, 0, 0.4),
+    0 16px 32px rgba(0, 0, 0, 0.3),
+    0 0 0 1px var(--endspace-accent-yellow);
+  color-scheme: dark;
 }
 
 /* 重置：统一盒模型，清空内外边距 */
@@ -51,6 +87,11 @@ body {
   color: var(--endspace-text-primary);
   overflow-x: hidden;
   cursor: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M2 2 L12 28 L16 18 L26 14 L2 2 Z' fill='%2318181b' stroke='%23ffffff' stroke-width='1.5' style='filter: drop-shadow(4px 4px 0px rgba(0,0,0,0.3));'/%3E%3C/svg%3E") 2 2, auto;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+/* 深色模式：自绘光标换浅色填充，避免在深底上不可见 */
+:root[data-theme="dark"] body {
+  cursor: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M2 2 L12 28 L16 18 L26 14 L2 2 Z' fill='%23e8eaeb' stroke='%230f1419' stroke-width='1.5' style='filter: drop-shadow(4px 4px 0px rgba(0,0,0,0.5));'/%3E%3C/svg%3E") 2 2, auto;
 }
 
 /* 可点击元素：青色圆点版自定义光标 */
@@ -288,16 +329,16 @@ body::before {
 .endspace-frame::before {
   content: ''; position: absolute; top: -1px; left: -1px;
   width: 0; height: 0;
-  border-top: 3px solid var(--endspace-text-primary);
-  border-left: 3px solid var(--endspace-text-primary);
+  border-top: 3px solid #1d2125;
+  border-left: 3px solid #1d2125;
   transition: all 0.3s ease; opacity: 0; z-index: 20;
 }
 /* 右下角装饰角标（同上，对角呼应） */
 .endspace-frame::after {
   content: ''; position: absolute; bottom: -1px; right: -1px;
   width: 0; height: 0;
-  border-bottom: 3px solid var(--endspace-text-primary);
-  border-right: 3px solid var(--endspace-text-primary);
+  border-bottom: 3px solid #1d2125;
+  border-right: 3px solid #1d2125;
   transition: all 0.3s ease; opacity: 0; z-index: 20;
 }
 /* 悬停：边框变黄 + 加深投影 + 上浮 2px */
@@ -356,7 +397,7 @@ body::before {
 /* 圆形按钮：白底 + 轻微投影，按下缩放反馈 */
 .ctrl-btn {
   width: 2.5rem; height: 2.5rem; border-radius: 9999px;
-  background: #fff; display: flex; align-items: center; justify-content: center;
+  background: var(--endspace-ctrl-bg); display: flex; align-items: center; justify-content: center;
   padding: 0.25rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   transition: transform 0.15s;
 }
@@ -371,12 +412,19 @@ body::before {
 /* 悬停：内层变黄 */
 .ctrl-btn:hover .ctrl-btn-inner { background: #FBFB46; }
 /* 回顶按钮默认显示的百分比数字 */
-.ctrl-percent { font-size: 10px; font-weight: 700; font-family: monospace; color: #4b5563; }
+.ctrl-percent { font-size: 10px; font-weight: 700; font-family: monospace; color: var(--endspace-ctrl-percent); }
 /* 悬停时隐藏百分比 */
 .ctrl-btn:hover .ctrl-percent { display: none; }
 /* 正放/倒放：图标常显（灰色描边），hover 转黑 */
-#btn-play svg, #btn-reverse svg { display: block; stroke: #afb4bd; }
+#btn-play svg, #btn-reverse svg { display: block; stroke: var(--endspace-ctrl-icon); }
 #btn-play:hover svg, #btn-reverse:hover svg { stroke: #000; }
+/* 主题切换按钮：浅色下显示月亮（点击进深色），深色下显示太阳 */
+#btn-theme svg { display: block; stroke: var(--endspace-ctrl-icon); }
+#btn-theme:hover svg { stroke: #000; }
+#btn-theme .icon-sun { display: none; }
+#btn-theme .icon-moon { display: block; }
+:root[data-theme="dark"] #btn-theme .icon-sun { display: block; }
+:root[data-theme="dark"] #btn-theme .icon-moon { display: none; }
 /* 回顶：默认只显示百分比，图标悬停才出现 */
 #btn-top svg { display: none; }
 #btn-top:hover svg { display: block; }
@@ -386,7 +434,7 @@ body::before {
    ============================================================ */
 /* 全局细滚动条：6px 灰色滑块 */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--endspace-scrollbar-thumb); border-radius: 3px; }
 
 /* ============================================================
    首页（声音档案列表）
@@ -403,7 +451,7 @@ body::before {
 /* 大号区段标题（近白色，盖在水印上） */
 .sound-heading-title {
   font-size: 3rem; font-weight: 900;
-  color: #E8E8EA !important;
+  color: var(--endspace-heading-text) !important;
   position: relative; z-index: 10;
   letter-spacing: 0.02em;
 }
@@ -440,14 +488,14 @@ body::before {
 .search-go {
   position: absolute; right: 0.25rem; top: 0.25rem; bottom: 0.25rem;
   padding: 0 0.75rem;
-  background: var(--endspace-bg-tertiary); color: #000;
+  background: var(--endspace-bg-tertiary); color: var(--endspace-text-strong);
   font-weight: 700; font-size: 0.75rem; letter-spacing: 0.05em;
   border-left: 1px solid var(--endspace-border-base);
   font-family: 'JetBrains Mono', monospace;
   transition: background 0.2s;
 }
-/* GO 按钮：悬停变黄 */
-.search-go:hover { background: #FBFB46; }
+/* GO 按钮：悬停变黄（文字强制转黑，深浅模式下均保持可读） */
+.search-go:hover { background: #FBFB46; color: #000; }
 /* 状态行（搜索结果显示数量等），左右两端分布 */
 .status-line {
   display: flex; justify-content: space-between;
@@ -475,7 +523,7 @@ body::before {
 }
 /* 块标题（如 JULY 07），等宽大写 */
 .sound-log-title {
-  font-size: 1.875rem; font-weight: 700; color: #000;
+  font-size: 1.875rem; font-weight: 700; color: var(--endspace-text-strong);
   font-family: 'JetBrains Mono', monospace;
   text-transform: uppercase; letter-spacing: 0.5px;
   position: relative; z-index: 10; padding-left: 0.5rem;
@@ -488,7 +536,7 @@ body::before {
 }
 /* 状态行（带绿色圆点的在线/就绪状态） */
 .sound-log-status {
-  font-size: 0.75rem; color: #000; margin-bottom: 0.5rem;
+  font-size: 0.75rem; color: var(--endspace-text-strong); margin-bottom: 0.5rem;
   font-family: 'JetBrains Mono', monospace; letter-spacing: 0.04em;
   z-index: 10; position: relative;
 }
@@ -570,7 +618,10 @@ body::before {
 .sound-entry-date span { color: var(--endspace-text-muted); transition: color 0.3s; }
 .sound-entry:hover .sound-entry-date span { color: #000; }
 /* 条目标题（录音名） */
-.sound-entry-title { font-weight: 700; color: #000; font-size: 0.875rem; line-height: 1.5; }
+.sound-entry-title { font-weight: 700; color: var(--endspace-text-strong); font-size: 0.875rem; line-height: 1.5; }
+/* 悬停/播放中：行底变黄时标题强制转黑 */
+.sound-entry:hover .sound-entry-title,
+.sound-entry.playing .sound-entry-title { color: #000; }
 /* 标题行：标题 + SOUND_ACCESS 提示同排（桌面端），移动端允许换行 */
 .sound-entry-title-row { display: flex; align-items: baseline; gap: 0.75rem; }
 @media (max-width: 767px) { .sound-entry-title-row { flex-wrap: wrap; row-gap: 0.25rem; } }
@@ -658,3 +709,19 @@ body::before {
 @media (max-width: 767px) {
   .sound-entry-side .sound-entry-speed { margin-left: auto; }
 }
+
+/* ============================================================
+   深色模式补充（变量在 :root[data-theme="dark"] 中换肤，
+   此处只放少量无法变量化的硬编码覆盖）
+   ============================================================ */
+:root[data-theme="dark"] .endspace-frame {
+  box-shadow:
+    0 10px 30px -10px rgba(0, 0, 0, 0.5),
+    0 4px 6px -2px rgba(0, 0, 0, 0.3);
+}
+/* 悬浮胶囊：深色模式下改用深底毛玻璃 */
+:root[data-theme="dark"] .controls-capsule {
+  background: rgba(37, 41, 45, 0.85);
+}
+/* 标题栏随主题切换平滑过渡 */
+.titlebar { transition: background-color 0.3s ease; }
