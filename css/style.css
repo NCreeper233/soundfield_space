@@ -1,0 +1,654 @@
+/* ============================================================
+   声界域 (SOUNDFIELD SPACE) - 全局样式
+   风格：浅色工业感 / Endfield 主题
+   （由旧版 style.js + 核心组件静态化移植而来）
+   结构：根变量 → 基础样式 → 加载遮罩 → 布局 → 标题栏 →
+         容器卡片 → 页脚 → 悬浮控制 → 首页声音档案
+   ============================================================ */
+
+/* ----- 全局设计变量（色板 / 边框 / 网格 / 阴影） ----- */
+:root {
+  --endspace-bg-base: #fafafa;          /* 页面底色 */
+  --endspace-bg-primary: #ffffff;       /* 卡片底色 */
+  --endspace-bg-secondary: #f4f4f5;     /* 输入框等次级底色 */
+  --endspace-bg-tertiary: #e4e4e7;      /* 按钮等三级底色 */
+  --endspace-text-primary: #18181b;     /* 主文字 */
+  --endspace-text-secondary: #52525b;   /* 次级文字 */
+  --endspace-text-muted: #a1a1aa;       /* 弱化文字（水印/提示） */
+  --endspace-accent-yellow: #FBFB45;    /* 主强调色（黄） */
+  --endspace-accent-yellow-dim: rgba(251, 251, 69, 0.15);
+  --endspace-accent-cyan: #FBFB45;      /* 副强调色（旧版为青色，现与黄同值） */
+  --endspace-accent-cyan-dim: rgba(251, 251, 69, 0.1);
+  --endspace-border-base: #e4e4e7;      /* 常规边框 */
+  --endspace-border-active: #FBFB45;    /* 悬停/激活边框 */
+  --endspace-grid-color: rgba(0,0,0,0.03); /* 页面网格线颜色 */
+  --endspace-shadow-base:               /* 常规投影（多层轻阴影） */
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    0 4px 8px rgba(0, 0, 0, 0.04);
+  --endspace-shadow-hover:              /* 悬停投影（带黄色描边） */
+    0 4px 8px rgba(0, 0, 0, 0.08),
+    0 8px 16px rgba(0, 0, 0, 0.06),
+    0 16px 32px rgba(0, 0, 0, 0.04),
+    0 0 0 1px var(--endspace-accent-yellow);
+}
+
+/* 重置：统一盒模型，清空内外边距 */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* 根字号随视口自适应（1440px 设计稿基准，移动端按 390px 基准缩放到 390px 档） */
+html {
+  font-size: clamp(14px, calc(16px * (100vw / 1440)), 24px);
+}
+@media (orientation: portrait), (max-width: 767px) {
+  html { font-size: clamp(14px, calc(16px * (100vw / 390)), 20px); }
+}
+
+/* 页面主体：浅色底 + 自绘箭头光标（内联 SVG data URI） */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--endspace-bg-base);
+  color: var(--endspace-text-primary);
+  overflow-x: hidden;
+  cursor: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M2 2 L12 28 L16 18 L26 14 L2 2 Z' fill='%2318181b' stroke='%23ffffff' stroke-width='1.5' style='filter: drop-shadow(4px 4px 0px rgba(0,0,0,0.3));'/%3E%3C/svg%3E") 2 2, auto;
+}
+
+/* 可点击元素：青色圆点版自定义光标 */
+a, button, [role="button"] {
+  cursor: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M2 2 L12 28 L16 18 L26 14 L2 2 Z' fill='%2362F0F5' stroke='%23000000' stroke-width='1.5' style='filter: drop-shadow(4px 4px 0px rgba(0,0,0,0.3));'/%3E%3Ccircle cx='24' cy='24' r='4' fill='none' stroke='%2362F0F5' stroke-width='2'/%3E%3C/svg%3E") 2 2, pointer;
+}
+
+/* 链接/按钮基础清理 */
+a { text-decoration: none; color: inherit; }
+button { font-family: inherit; background: none; border: none; }
+
+/* ----- 技术网格背景：fixed 铺满全屏的 40px 网格（body 伪元素） ----- */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--endspace-grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--endspace-grid-color) 1px, transparent 1px);
+  background-size: 40px 40px;
+  z-index: -1;
+  pointer-events: none;   /* 不遮挡任何交互 */
+}
+
+/* ----- HUD 装饰角标：左上/右下 L 型边框（仅装饰，不拦截点击） ----- */
+/* 左上角 */
+.ef-hud-tl {
+  position: fixed; top: 1rem; left: 1rem;
+  width: 3rem; height: 3rem;
+  border-top: 2px solid rgba(6, 182, 212, 0.4);
+  border-left: 2px solid rgba(6, 182, 212, 0.4);
+  pointer-events: none; z-index: 50;
+}
+/* 右下角 */
+.ef-hud-br {
+  position: fixed; bottom: 1rem; right: 1rem;
+  width: 3rem; height: 3rem;
+  border-bottom: 2px solid rgba(6, 182, 212, 0.4);
+  border-right: 2px solid rgba(6, 182, 212, 0.4);
+  pointer-events: none; z-index: 50;
+}
+
+/* ============================================================
+   加载遮罩（全屏启动画面）
+   结构：网格深底 + 居中 Logo + 左侧竖进度条 + 百分比/状态 + 黄色扫屏层
+   说明：进度由 script.js 驱动 CSS 变量 --progress；扫屏与淡出
+         分别由 .sweeping / .fadeout 两个类触发动画
+   ============================================================ */
+.loading-cover {
+  position: fixed; top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: #0f1419;
+  /* 120px 网格背景（色值 #252525，比主页面网格更大更醒目） */
+  background-image:
+    linear-gradient(#252525 1px, transparent 1px),
+    linear-gradient(90deg, #252525 1px, transparent 1px);
+  background-size: 120px 120px;
+  z-index: 99999;
+  overflow: hidden;
+}
+/* 居中内容区：右侧竖排（Logo + 预留文字位） */
+.center-content {
+  position: absolute; top: 50%; right: 12%;
+  transform: translateY(-50%);
+  display: flex; flex-direction: column; align-items: center;
+  gap: 20px; z-index: 10;
+}
+/* Logo 图片 */
+.loading-image {
+  max-width: 240px; max-height: 240px; opacity: 0.9;
+}
+/* 左侧竖向进度槽 */
+.progress-container {
+  position: absolute; left: 0; top: 0;
+  width: 12px; height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+}
+/* 进度填充条：高度由 --progress 变量控制 */
+.progress-fill {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: var(--progress);
+  background: #FBFB46;
+  transition: height 0.05s linear;
+}
+/* 百分比 + 状态文案块：贴着进度条顶端随动（--progress 控制 top） */
+.progress-info {
+  position: absolute; left: 24px; top: var(--progress);
+  transform: translateY(-100%);
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: 6px; transition: top 0.05s linear; padding-bottom: 12px;
+}
+/* 大号百分比数字 */
+.progress-percent {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 700; color: #FBFB46;
+  letter-spacing: 2px; line-height: 1;
+}
+/* 状态行（闪烁圆点 + 状态文案） */
+.status-line { display: flex; align-items: center; gap: 8px; }
+/* 闪烁圆点 */
+.status-dot {
+  width: 6px; height: 6px; background: #FBFB46;
+  border-radius: 50%; animation: blink 0.8s ease-in-out infinite;
+}
+/* 状态文案（INITIALIZING / LOADING / READY ...） */
+.status-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500;
+  color: rgba(251, 251, 70, 0.8);
+  letter-spacing: 2px; text-transform: uppercase;
+}
+/* 黄色扫屏层：默认收起（scaleX 0），sweeping 时从左向右展开 */
+.sweep-overlay {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #FBFB46;
+  transform: scaleX(0); transform-origin: left;
+  pointer-events: none; z-index: 50;
+}
+/* 扫屏动画（0.4s 展开并保持） */
+.loading-cover.sweeping .sweep-overlay {
+  animation: sweepCover 0.4s ease-in-out forwards;
+}
+/* 淡出阶段：遮罩整体透明，扫屏层保持全开 */
+.loading-cover.fadeout { opacity: 0; transition: opacity 0.3s ease; }
+.loading-cover.fadeout .sweep-overlay { transform: scaleX(1); }
+/* 圆点闪烁 */
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+/* 扫屏展开 */
+@keyframes sweepCover {
+  0% { transform: scaleX(0); transform-origin: left; }
+  100% { transform: scaleX(1); transform-origin: left; }
+}
+/* 移动端：Logo 居中、进度条改为底部横向、信息块横排随进度左右移动 */
+@media (max-width: 768px) {
+  .center-content { top: 50%; right: auto; left: 50%; transform: translate(-50%, -50%); gap: 16px; }
+  .loading-image { max-width: 160px; max-height: 160px; }
+  .progress-container { width: calc(100% - 6rem); height: 8px; top: auto; bottom: 30px; left: 0; }
+  .progress-fill { width: var(--progress); height: 100%; transition: width 0.05s linear; }
+  .progress-info {
+    top: auto; bottom: 24px; left: 0;
+    transform: translateX(calc((100vw - 6rem) * var(--progress-num) / 100 + 12px));
+    flex-direction: row; gap: 8px; padding-bottom: 0;
+  }
+  .progress-percent { font-size: 14px; }
+  .status-line { display: none; }
+}
+
+/* ============================================================
+   布局（页面主体）
+   ============================================================ */
+.main { margin-left: 0; display: flex; flex-direction: column; min-height: 100vh; }
+@media (max-width: 767px) { .main { margin-left: 0; } }
+
+/* ============================================================
+   标题栏（含水印跑马灯背景）
+   结构：深色网格层 + 水印大字跑马灯 + 前景内容（站名/阶段名等）
+   ============================================================ */
+.titlebar {
+  position: relative;
+  padding: 5rem 0;
+  border-bottom: 2px solid var(--endspace-border-base);
+  overflow: hidden;
+  background: var(--endspace-bg-base);
+}
+/* 标题栏内细网格装饰层（opacity 0.1 的暗线） */
+.titlebar-grid {
+  position: absolute; inset: 0; opacity: 0.1; pointer-events: none;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 2px, var(--endspace-text-muted) 2px, var(--endspace-text-muted) 4px),
+    repeating-linear-gradient(90deg, transparent, transparent 2px, var(--endspace-text-muted) 2px, var(--endspace-text-muted) 4px);
+  background-size: 100px 100px;
+}
+/* 水印跑马灯容器 */
+.watermark-layer {
+  position: absolute; inset: 0; display: flex; align-items: center;
+  opacity: 0.15; pointer-events: none; overflow: hidden;
+}
+/* 跑马灯轨道：内联块 + 无缝循环（内容重复两次才能首尾衔接） */
+.bg-watermark-scroll {
+  display: inline-block; white-space: nowrap; line-height: 1;
+  animation: bgMarquee 30s linear infinite;
+}
+/* 单个水印文字块 */
+.watermark-text {
+  font-size: 10rem; font-weight: 900;
+  color: var(--endspace-text-primary); user-select: none;
+}
+/* 水印之间的大圆点分隔符 */
+.watermark-dot { margin: 0 5vw; color: var(--endspace-text-muted); }
+/* 水印无缝滚动：translateX(-50%) 正好走完一组 */
+@keyframes bgMarquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+/* 大屏加大水印与标题栏留白 */
+@media (min-width: 768px) { .watermark-text { font-size: 14rem; } .titlebar { padding: 7rem 0; } }
+
+/* ============================================================
+   容器与卡片（页面主体框架）
+   ============================================================ */
+/* 内部容器：宽度撑满，自身 z-index 保证内容盖在水印上 */
+.container-inner { width: 100%; position: relative; z-index: 10; flex-grow: 1; }
+/* 外层包裹：居中布局，随断点逐级放宽最大宽度 */
+.container-wrapper {
+  position: relative; margin: 0 auto;
+  display: flex; justify-content: center; align-items: flex-start;
+  padding: 2rem 1rem;
+}
+@media (min-width: 768px) { .container-wrapper { padding: 2rem 2rem; } }
+@media (min-width: 1024px) { .container-wrapper { padding: 2rem 3rem; max-width: 80rem; } }
+@media (min-width: 1280px) { .container-wrapper { max-width: 96rem; } }
+/* 内容列：宽度占满容器 */
+.content-col { width: 100%; }
+
+/* 卡片通用框架：白底 + 细边框 + 轻阴影 */
+.endspace-frame {
+  background: var(--endspace-bg-primary);
+  border: 1px solid var(--endspace-border-base);
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    0 10px 30px -10px rgba(0,0,0,0.1),
+    0 4px 6px -2px rgba(0,0,0,0.05);
+  z-index: 10;
+}
+/* 左上角装饰角标（悬停时从 0 生长为 16px 的 L 形边框） */
+.endspace-frame::before {
+  content: ''; position: absolute; top: -1px; left: -1px;
+  width: 0; height: 0;
+  border-top: 3px solid var(--endspace-text-primary);
+  border-left: 3px solid var(--endspace-text-primary);
+  transition: all 0.3s ease; opacity: 0; z-index: 20;
+}
+/* 右下角装饰角标（同上，对角呼应） */
+.endspace-frame::after {
+  content: ''; position: absolute; bottom: -1px; right: -1px;
+  width: 0; height: 0;
+  border-bottom: 3px solid var(--endspace-text-primary);
+  border-right: 3px solid var(--endspace-text-primary);
+  transition: all 0.3s ease; opacity: 0; z-index: 20;
+}
+/* 悬停：边框变黄 + 加深投影 + 上浮 2px */
+.endspace-frame:hover {
+  border-color: var(--endspace-border-active);
+  box-shadow: var(--endspace-shadow-hover);
+  transform: translateY(-2px);
+}
+/* 悬停时四个角标生长出来 */
+.endspace-frame:hover::before, .endspace-frame:hover::after {
+  opacity: 1; width: 16px; height: 16px;
+}
+
+/* ============================================================
+   页脚（深色底 + 顶部频谱色条 + 版权 + 右下角装饰）
+   ============================================================ */
+.footer {
+  position: relative; margin-top: 5rem;
+  background: #252726; color: #d1d5db; overflow: hidden;
+}
+/* 顶部 2px 渐变色条（青→黄→青） */
+.spectrum-bar {
+  height: 2px;
+  background: linear-gradient(90deg, var(--endspace-accent-cyan) 0%, var(--endspace-accent-yellow) 50%, var(--endspace-accent-cyan) 100%);
+  opacity: 0.3;
+}
+/* 页脚内容：竖排版权文字 */
+.footer-content { padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
+@media (min-width: 768px) { .footer-content { padding: 2rem 1rem; gap: 1rem; } }
+/* 版权行：居中、小字、灰色 */
+.footer-copyright { justify-content: center; align-items: center; font-size: 0.75rem; color: #6b7280; text-align: center; }
+/* 右下角 L 形装饰角 */
+.footer-corner {
+  position: absolute; bottom: 0; right: 0;
+  width: 3rem; height: 3rem;
+  border-bottom: 4px solid #1f2937; border-right: 4px solid #1f2937;
+  opacity: 0.5; pointer-events: none;
+}
+@media (min-width: 768px) { .footer-corner { width: 4rem; height: 4rem; } }
+
+/* ============================================================
+   悬浮控制（右下角胶囊：正放 / 倒放 / 回顶）
+   ============================================================ */
+/* 悬浮定位：固定于右下角 */
+.controls-wrap { position: fixed; right: 1rem; bottom: 2rem; z-index: 50; }
+/* 胶囊外壳：半透明灰底 + 毛玻璃，桌面端竖排、移动端横排 */
+.controls-capsule {
+  background: rgba(156, 163, 175, 0.8);
+  backdrop-filter: blur(4px);
+  padding: 0.375rem; border-radius: 9999px;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+  display: flex; gap: 0.75rem;
+}
+@media (min-width: 1024px) { .controls-capsule { flex-direction: column; } }
+@media (max-width: 1023px) { .controls-capsule { flex-direction: row; } }
+/* 圆形按钮：白底 + 轻微投影，按下缩放反馈 */
+.ctrl-btn {
+  width: 2.5rem; height: 2.5rem; border-radius: 9999px;
+  background: #fff; display: flex; align-items: center; justify-content: center;
+  padding: 0.25rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: transform 0.15s;
+}
+/* 按下时轻微缩小 */
+.ctrl-btn:active { transform: scale(0.95); }
+/* 内层圆形区域：负责黄色 hover 背景 */
+.ctrl-btn-inner {
+  width: 100%; height: 100%; border-radius: 9999px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+/* 悬停：内层变黄 */
+.ctrl-btn:hover .ctrl-btn-inner { background: #FBFB46; }
+/* 回顶按钮默认显示的百分比数字 */
+.ctrl-percent { font-size: 10px; font-weight: 700; font-family: monospace; color: #4b5563; }
+/* 悬停时隐藏百分比 */
+.ctrl-btn:hover .ctrl-percent { display: none; }
+/* 正放/倒放：图标常显（灰色描边），hover 转黑 */
+#btn-play svg, #btn-reverse svg { display: block; stroke: #afb4bd; }
+#btn-play:hover svg, #btn-reverse:hover svg { stroke: #000; }
+/* 回顶：默认只显示百分比，图标悬停才出现 */
+#btn-top svg { display: none; }
+#btn-top:hover svg { display: block; }
+
+/* ============================================================
+   杂项（滚动条样式）
+   ============================================================ */
+/* 全局细滚动条：6px 灰色滑块 */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 3px; }
+
+/* ============================================================
+   首页（声音档案列表）
+   ============================================================ */
+.sound-section { position: relative; margin-bottom: 3rem; }
+
+/* 区段标题行（SEARCH / CATEGORIES / TAGS）：下边框 + 左对齐 */
+.sound-heading-row {
+  display: flex; align-items: flex-end; gap: 1rem;
+  width: 100%; margin-bottom: 2rem; padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--endspace-border-base);
+  position: relative;
+}
+/* 大号区段标题（近白色，盖在水印上） */
+.sound-heading-title {
+  font-size: 3rem; font-weight: 900;
+  color: #E8E8EA !important;
+  position: relative; z-index: 10;
+  letter-spacing: 0.02em;
+}
+/* 区段元信息（如条目计数），紧贴标题底部右侧 */
+.sound-section-meta {
+  color: var(--endspace-text-secondary);
+  font-size: 0.9rem; font-weight: 500;
+  letter-spacing: 0.04em; padding-bottom: 0.35rem;
+  white-space: nowrap;
+}
+/* 移动端：标题与元信息改竖排 */
+@media (max-width: 767px) {
+  .sound-heading-row { align-items: flex-start; flex-direction: column; gap: 0.25rem; }
+  .sound-section-meta { padding-bottom: 0; }
+}
+
+/* 搜索框（输入框 + 右侧 GO 按钮） */
+.search-box { display: flex; flex-direction: column; gap: 1rem; }
+/* 输入框容器：relative 以定位右侧按钮 */
+.search-field { position: relative; }
+/* 输入框本体：等宽字体、次级底色、悬停/聚焦描边变化 */
+.search-field input {
+  width: 100%; padding: 0.75rem 3.5rem 0.75rem 1rem;
+  background: var(--endspace-bg-secondary);
+  border: 1px solid var(--endspace-border-base);
+  color: var(--endspace-text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem; letter-spacing: 0.5px;
+  outline: none; transition: all 0.2s;
+}
+/* 占位提示文字颜色 */
+.search-field input::placeholder { color: var(--endspace-text-muted); }
+/* GO 按钮：绝对定位在输入框右侧竖排居中 */
+.search-go {
+  position: absolute; right: 0.25rem; top: 0.25rem; bottom: 0.25rem;
+  padding: 0 0.75rem;
+  background: var(--endspace-bg-tertiary); color: #000;
+  font-weight: 700; font-size: 0.75rem; letter-spacing: 0.05em;
+  border-left: 1px solid var(--endspace-border-base);
+  font-family: 'JetBrains Mono', monospace;
+  transition: background 0.2s;
+}
+/* GO 按钮：悬停变黄 */
+.search-go:hover { background: #FBFB46; }
+/* 状态行（搜索结果显示数量等），左右两端分布 */
+.status-line {
+  display: flex; justify-content: space-between;
+  font-size: 10px; color: var(--endspace-text-muted);
+  font-family: monospace;
+}
+
+/* ============================================================
+   声音记录块（按月分组的日志区块）
+   ============================================================ */
+.sound-block { margin-bottom: 4rem; }
+/* 块标题行：下边框分隔 */
+.sound-log-heading {
+  display: flex; align-items: flex-end; gap: 0.75rem;
+  margin-bottom: 2rem; padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--endspace-border-base);
+  position: relative;
+}
+/* 块标题背景大数字（水印，置于标题下方） */
+.sound-log-watermark {
+  position: absolute; top: -1rem; left: -0.5rem;
+  font-size: 3.75rem; font-weight: 900;
+  color: var(--endspace-text-muted); opacity: 0.2;
+  user-select: none; z-index: 0;
+}
+/* 块标题（如 JULY 07），等宽大写 */
+.sound-log-title {
+  font-size: 1.875rem; font-weight: 700; color: #000;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  position: relative; z-index: 10; padding-left: 0.5rem;
+}
+/* 元信息行（日期时间等） */
+.sound-log-meta {
+  font-size: 0.75rem; color: var(--endspace-text-secondary);
+  margin-bottom: 0.5rem; font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.04em; z-index: 10; position: relative;
+}
+/* 状态行（带绿色圆点的在线/就绪状态） */
+.sound-log-status {
+  font-size: 0.75rem; color: #000; margin-bottom: 0.5rem;
+  font-family: 'JetBrains Mono', monospace; letter-spacing: 0.04em;
+  z-index: 10; position: relative;
+}
+/* 状态前的小绿点 */
+.sound-log-status::before {
+  content: '';
+  display: inline-block; width: 6px; height: 6px;
+  background: #22c55e; border-radius: 50%;
+  margin-right: 0.4rem;
+}
+
+/* ============================================================
+   时间线（月份块内条目竖排 + 左侧连线与节点）
+   ============================================================ */
+/* 时间线容器：左侧留出竖线空间 */
+.timeline { position: relative; padding-left: 1.5rem; }
+@media (min-width: 768px) { .timeline { padding-left: 2.5rem; } }
+/* 左侧竖线 */
+.timeline::before {
+  content: '';
+  position: absolute; left: 0.5rem; top: 0; bottom: 0;
+  width: 1px; background: var(--endspace-border-base);
+}
+@media (min-width: 768px) { .timeline::before { left: 1rem; } }
+/* 单个条目行 */
+.timeline-item { position: relative; margin-bottom: 0.5rem; }
+/* 竖线到条目的水平连接线（悬停时变黄） */
+.timeline-connector {
+  position: absolute; left: -1.5rem; top: 50%;
+  width: 1rem; height: 1px; margin-top: -0.5px;
+  background: var(--endspace-border-base);
+  transition: background 0.2s;
+}
+@media (min-width: 768px) { .timeline-connector { left: -2.5rem; width: 2rem; } }
+.timeline-item:hover .timeline-connector { background: var(--endspace-accent-yellow); }
+/* 竖线上的节点圆点（悬停变黄实心） */
+.timeline-dot {
+  position: absolute; left: -1.7rem; top: 50%;
+  width: 0.5rem; height: 0.5rem; margin-top: -0.25rem;
+  border-radius: 9999px;
+  background: var(--endspace-bg-base);
+  border: 1px solid var(--endspace-border-base);
+  transition: all 0.2s; z-index: 10;
+}
+@media (min-width: 768px) { .timeline-dot { left: -2.7rem; } }
+.timeline-item:hover .timeline-dot {
+  border-color: var(--endspace-accent-yellow);
+  background: var(--endspace-accent-yellow);
+}
+
+/* ============================================================
+   声音条目（每条录音的记录行）
+   桌面端一行三段：日期 | 标题（含 tags/动作）| 右侧倍速音量；
+   移动端竖排堆叠
+   ============================================================ */
+.sound-entry {
+  display: flex; flex-direction: column; gap: 1rem;
+  padding: 1rem;
+  transition: all 0.3s;
+}
+/* 悬停：整行变黄底 */
+.sound-entry:hover { background: #FBFB46; }
+@media (min-width: 768px) { .sound-entry { flex-direction: row; align-items: center; } }
+/* 日期列：等宽小字大写，桌面端独占 8rem 宽并带右分隔线 */
+.sound-entry-date {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+  letter-spacing: 0.5px; text-transform: uppercase;
+  color: var(--endspace-text-secondary);
+  flex-shrink: 0; white-space: nowrap;
+  transition: color 0.3s;
+}
+@media (min-width: 768px) {
+  .sound-entry-date { width: 8rem; border-right: 1px solid var(--endspace-border-base); padding-right: 1rem; }
+}
+/* 悬停：日期转黑、分隔线变淡 */
+.sound-entry:hover .sound-entry-date { color: #000; border-color: rgba(0,0,0,0.2); }
+/* 日期内的次要文字（如星期几） */
+.sound-entry-date span { color: var(--endspace-text-muted); transition: color 0.3s; }
+.sound-entry:hover .sound-entry-date span { color: #000; }
+/* 条目标题（录音名） */
+.sound-entry-title { font-weight: 700; color: #000; font-size: 0.875rem; line-height: 1.5; }
+/* 标题行：标题 + SOUND_ACCESS 提示同排（桌面端），移动端允许换行 */
+.sound-entry-title-row { display: flex; align-items: baseline; gap: 0.75rem; }
+@media (max-width: 767px) { .sound-entry-title-row { flex-wrap: wrap; row-gap: 0.25rem; } }
+@media (min-width: 768px) { .sound-entry-title { font-size: 1rem; } }
+/* 标签行（类型标签） */
+.sound-entry-tags { display: flex; gap: 0.5rem; margin-top: 0.25rem; }
+.sound-entry-tags span {
+  font-size: 10px; color: #6b7280; text-transform: uppercase;
+  transition: color 0.3s;
+}
+.sound-entry:hover .sound-entry-tags span { color: #000; }
+/* 点击播放提示（▶ 箭头文案），悬停时变黑并右移 */
+.sound-entry-action {
+  display: inline; font-family: monospace; font-size: 0.75rem;
+  color: var(--endspace-text-muted);
+  transition: all 0.3s;
+}
+@media (min-width: 768px) { .sound-entry-action { display: block; } }
+.sound-entry:hover .sound-entry-action {
+  color: #000; transform: translateX(4px);
+}
+
+/* ============================================================
+   月份双列网格：桌面端左 07 右 06 并排，移动端单列
+   ============================================================ */
+.sound-months {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+  align-items: start;
+}
+@media (min-width: 1024px) {
+  .sound-months { grid-template-columns: 1fr 1fr; gap: 2.5rem; }
+}
+/* 避免网格拉伸导致的换行错乱 */
+.sound-months > .sound-block { min-width: 0; }
+
+/* ============================================================
+   播放中状态：保持悬停效果
+   ============================================================ */
+.sound-entry.playing,
+.sound-entry.playing:hover { background: #FBFB46; }
+.sound-entry.playing .sound-entry-date { color: #000; border-color: rgba(0,0,0,0.2); }
+.sound-entry.playing .sound-entry-date span { color: #000; }
+.sound-entry.playing .sound-entry-tags span { color: #000; }
+.sound-entry.playing .sound-entry-action { color: #000; transform: translateX(4px); }
+/* 播放中的条目：时间线节点保持黄点 */
+.timeline-item:has(.sound-entry.playing) .timeline-dot {
+  border-color: var(--endspace-accent-yellow);
+  background: var(--endspace-accent-yellow);
+}
+
+/* 月份块为奇数个时：最后一个跨双列占满整行 */
+.sound-months > .sound-block:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+/* ============================================================
+   条目右侧控制区（倍速 / 音量）
+   桌面端：右对齐竖排两行（SOUND_ACCESS 留在标题行）；
+   移动端：横排，SOUND_ACCESS 在最左，倍速被推到最右
+   ============================================================ */
+.sound-entry-side {
+  display: flex;
+  flex-direction: row; align-items: center; gap: 0.75rem;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+@media (min-width: 768px) {
+  .sound-entry-side { flex-direction: column; align-items: flex-end; gap: 0.25rem; margin-left: auto; }
+}
+/* 倍速 / 音量切换（点击循环切换档位） */
+.sound-entry-speed,
+.sound-entry-vol {
+  font-family: monospace; font-size: 0.75rem;
+  color: var(--endspace-text-muted);
+  cursor: pointer; white-space: nowrap;
+  transition: color 0.3s;
+}
+/* 悬停与播放中：变黑 */
+.sound-entry:hover .sound-entry-speed,
+.sound-entry:hover .sound-entry-vol,
+.sound-entry.playing .sound-entry-speed,
+.sound-entry.playing .sound-entry-vol { color: #000; }
+
+/* 移动端：倍速推到最右（SOUND_ACCESS 自然落到最左） */
+@media (max-width: 767px) {
+  .sound-entry-side .sound-entry-speed { margin-left: auto; }
+}

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>声界域 - SOUNDFIELD SPACE</title>
+<link rel="icon" type="image/x-icon" href="images/favicon.ico" />
+<link rel="icon" type="image/png" href="images/favicon.png" />
+<link rel="icon" type="image/webp" href="images/logo.webp" />
+<link rel="icon" type="image/webp" media="(prefers-color-scheme: dark)" href="images/favicon_light.webp" />
+<link rel="icon" type="image/webp" media="(prefers-color-scheme: light)" href="images/favicon_dark.webp" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- HUD Corner Decorations -->
+<div class="ef-hud-tl"></div>
+<div class="ef-hud-br"></div>
+
+<!-- ============================================ Loading Cover -->
+<div id="loading-cover" class="loading-cover">
+  <div class="progress-container"><div class="progress-track" style="position:absolute;inset:0"><div class="progress-fill" id="progress-fill"></div></div></div>
+  <div class="center-content">
+    <img src="images/logo.webp" alt="Loading" class="loading-image" />
+  </div>
+  <div class="progress-info" id="progress-info">
+    <div class="progress-percent" id="progress-percent">0%</div>
+    <div class="status-line">
+      <span class="status-dot"></span>
+      <span class="status-text" id="status-text">INITIALIZING</span>
+    </div>
+  </div>
+  <div class="sweep-overlay"></div>
+</div>
+
+<!-- ============================================ Main -->
+<div class="main">
+  <!-- TitleBar with watermark marquee -->
+  <header class="titlebar">
+    <div class="titlebar-grid"></div>
+    <div class="watermark-layer">
+      <div class="bg-watermark-scroll" id="watermark-scroll">
+        <span class="watermark-text">SOUNDFIELD_SPACE</span><span class="watermark-dot">&bull;</span>
+        <span class="watermark-text">SOUNDFIELD_SPACE</span><span class="watermark-dot">&bull;</span>
+        <span class="watermark-text">SOUNDFIELD_SPACE</span><span class="watermark-dot">&bull;</span>
+        <span class="watermark-text">SOUNDFIELD_SPACE</span><span class="watermark-dot">&bull;</span>
+        <span class="watermark-text">SOUNDFIELD_SPACE</span><span class="watermark-dot">&bull;</span>
+        <span class="watermark-text">SOUNDFIELD_SPACE</span><span class="watermark-dot">&bull;</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <div id="container-inner" class="container-inner">
+    <div class="container-wrapper">
+      <div class="content-col">
+
+        <!-- SEARCH -->
+        <section class="sound-section">
+          <div class="sound-heading-row">
+            <span class="sound-heading-title">SEARCH</span>
+            <span class="sound-section-meta" id="sounds-indexed-meta">// 0_SOUNDS_INDEXED</span>
+            <div style="flex:1"></div>
+          </div>
+          <form id="search-form" class="search-box" autocomplete="off">
+            <div class="search-field">
+              <input type="text" id="search-input" placeholder="Input query..." />
+              <button type="submit" class="search-go">GO</button>
+            </div>
+            <div class="status-line">
+              <div>SYSTEM_STATUS: <span style="color:#22c55e">ONLINE</span></div>
+              <div id="stage-display">FIRST TAKING</div>
+            </div>
+          </form>
+        </section>
+
+        <!-- SOUND LOGS -->
+        <section class="sound-section">
+          <div class="sound-months" id="sound-months"></div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="spectrum-bar"></div>
+    <div class="footer-content">
+      <div class="footer-copyright">
+        <span>&copy; 2026 Soundfield Space 声界域. All Rights Reserved.</span>
+      </div>
+    </div>
+    <div class="footer-corner"></div>
+  </footer>
+</div>
+
+<!-- ============================================ Floating Controls -->
+<div class="controls-wrap">
+  <div class="controls-capsule">
+    <button class="ctrl-btn" id="btn-play" aria-label="Play All" title="Play All">
+      <span class="ctrl-btn-inner">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"><path d="M3 10v4M7 7v10M11 4v16M15 8v8M19 11v2"/></svg>
+      </span>
+    </button>
+    <button class="ctrl-btn" id="btn-reverse" aria-label="Reverse All" title="Reverse All">
+      <span class="ctrl-btn-inner">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      </span>
+    </button>
+    <button class="ctrl-btn" id="btn-top" aria-label="Scroll To Top" title="Scroll To Top">
+      <span class="ctrl-btn-inner" id="btn-top-inner">
+        <span class="ctrl-percent" id="scroll-percent">0%</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+      </span>
+    </button>
+  </div>
+</div>
+
+<script src="js/script.js"></script>
+<script src="js/main.js"></script>
+<script>
+/* Home page: client-side search filter */
+(function () {
+  var form = document.getElementById('search-form')
+  var input = document.getElementById('search-input')
+  var items = Array.prototype.slice.call(document.querySelectorAll('.timeline-item'))
+  var blocks = Array.prototype.slice.call(document.querySelectorAll('.sound-block'))
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault()
+    var q = input.value.trim().toLowerCase()
+    var matchCount = 0
+    items.forEach(function (item) {
+      var entry = item.querySelector('.sound-entry')
+      var base = ''
+      if (entry) {
+        var clone = entry.cloneNode(true)
+        var side = clone.querySelector('.sound-entry-side')
+        if (side) side.parentNode.removeChild(side)
+        base = clone.textContent || ''
+      }
+      var text = (base + ' ' + (item.getAttribute('data-search') || '')).toLowerCase()
+      var show = !q || text.indexOf(q) !== -1
+      item.style.display = show ? '' : 'none'
+      if (show) matchCount++
+    })
+    blocks.forEach(function (block) {
+      var visible = Array.prototype.filter.call(
+        block.querySelectorAll('.timeline-item'),
+        function (el) { return el.style.display !== 'none' }
+      ).length > 0
+      block.style.display = visible ? '' : 'none'
+    })
+    var statusLine = document.querySelector('.sound-section .status-line div:last-child')
+    if (statusLine) statusLine.textContent = q ? matchCount + '_RESULTS_FOUND' : getStage(audioDataList.length)
+  })
+})()
+</script>
+</body>
+</html>
